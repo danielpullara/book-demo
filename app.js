@@ -2,7 +2,12 @@ const express = require("express");
 require("dotenv").config();
 const mongoose = require('mongoose')
 const bodyParser = require("body-parser")
-const Author = require("./src/models/author")
+const { readAuthor, createAuthor, updateAuthor, deleteAuthor} = require("./src/controllers/authorControllers")
+const {createGenre, readGenres} = require("./src/controllers/genreControllers")
+const { createBook } = require("./src/controllers/bookControllers")
+const {createUser} = require ("./src/controllers/userControllers") 
+const { login, auth } = require("./src/controllers/authControllers") 
+
 
 mongoose.connect(process.env.DB_LOCAL, {
     useCreateIndex: true,
@@ -25,19 +30,29 @@ app.get("/", (req, res) => {
 })
 
 
-router.post('/authors', async (req, res) => {
-    const { name } = req.body;
-    if (!name || typeof name !== "string") return res.status(400).json({ status: "fail", error: "invalid input for name" })
+router.route("/authors")
+.get(readAuthor)
+.post(createAuthor)
+  
 
-    try {
-        const author = await Author.create({ name: name })
-        return res.status(201).json({ status: "ok", data: author })
-    } catch (err) {
-        return res.status(500).json({ status:"ok", error: err.message })
-    };
-});
-//this is a test
 
+router.delete("/authors/:id",deleteAuthor)
+router.put("/authors/:id", updateAuthor)
+
+
+
+router.route("/genres")
+.get(readGenres)
+.post(createGenre)
+
+router.route("/books")
+.post(createBook)
+
+router.route("/users")
+.post(auth, createUser)
+
+router.route("/auth/login")
+.post(login) 
 
 app.listen(process.env.PORT, () => {
     console.log("App is running on port", process.env.PORT);
